@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.Gaoding", "src\Light.Gaoding\Light.Gaoding.csproj", "{09C0BC7A-23AB-4B5D-987E-00997DEF94C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.Gaoding.Test", "src\Light.Gaoding.Test\Light.Gaoding.Test.csproj", "{288F859A-B5B2-456C-984E-74B2A053CD0B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{09C0BC7A-23AB-4B5D-987E-00997DEF94C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09C0BC7A-23AB-4B5D-987E-00997DEF94C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09C0BC7A-23AB-4B5D-987E-00997DEF94C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09C0BC7A-23AB-4B5D-987E-00997DEF94C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{288F859A-B5B2-456C-984E-74B2A053CD0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{288F859A-B5B2-456C-984E-74B2A053CD0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{288F859A-B5B2-456C-984E-74B2A053CD0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{288F859A-B5B2-456C-984E-74B2A053CD0B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
