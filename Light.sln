@@ -8,6 +8,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.FreeSql", "src\Light.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.Web", "src\Light.Web\Light.Web.csproj", "{9F5F3C7B-EF7F-48A1-8F76-0439AE78ECD8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.Summary", "src\Light.Summary\Light.Summary.csproj", "{9184BABC-D845-4553-B0B6-6978DF935C5C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.Summary.Test", "src\Light.Summary.Test\Light.Summary.Test.csproj", "{F8298E7A-01D8-4127-811A-D4AAC462410D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +34,13 @@ Global
 		{9F5F3C7B-EF7F-48A1-8F76-0439AE78ECD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9F5F3C7B-EF7F-48A1-8F76-0439AE78ECD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9F5F3C7B-EF7F-48A1-8F76-0439AE78ECD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9184BABC-D845-4553-B0B6-6978DF935C5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9184BABC-D845-4553-B0B6-6978DF935C5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9184BABC-D845-4553-B0B6-6978DF935C5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9184BABC-D845-4553-B0B6-6978DF935C5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8298E7A-01D8-4127-811A-D4AAC462410D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8298E7A-01D8-4127-811A-D4AAC462410D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8298E7A-01D8-4127-811A-D4AAC462410D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8298E7A-01D8-4127-811A-D4AAC462410D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
