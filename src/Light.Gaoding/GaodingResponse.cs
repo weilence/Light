@@ -2,18 +2,17 @@
 
 namespace Light.Gaoding
 {
-    class GaodingResponse
+    class MattingProductResponse
     {
-        [JsonPropertyName("code")]
-        public int Code { get; set; }
+        [JsonPropertyName("code")] public int Code { get; set; }
 
-        [JsonPropertyName("message")]
-        public string Message { get; set; }
+        [JsonPropertyName("message")] public string Message { get; set; }
+
+        [JsonPropertyName("result")] public string Result { get; set; }
     }
 
-    class MattingProductResponse : GaodingResponse
+    class AuthorizedCodeResponse
     {
-        [JsonPropertyName("result")]
-        public string Result { get; set; }
+        [JsonPropertyName("code")] public string Code { get; set; }
     }
 }

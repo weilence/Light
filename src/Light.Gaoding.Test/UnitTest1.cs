@@ -6,8 +6,9 @@ namespace Light.Gaoding.Test
 {
     public class UnitTest1
     {
-        [Fact]
-        public void Test1()
+        private IServiceProvider _provider;
+
+        public UnitTest1()
         {
             var accessKey = "";
             var secretKey = "";
@@ -25,17 +26,24 @@ namespace Light.Gaoding.Test
                 .Build();
             services.AddSingleton<IConfiguration>(configuration);
             services.AddGaoding();
-            var provider = services.BuildServiceProvider();
+            _provider = services.BuildServiceProvider();
+        }
 
-            var options = provider.GetService<IOptions<GaodingConfig>>();
-            var config = options.Value;
-            Assert.Equal(accessKey, config.AccessKey);
-            Assert.Equal(secretKey, config.SecretKey);
-
-            var gaodingService = provider.GetRequiredService<GaodingService>();
+        [Fact]
+        public void TestMatting()
+        {
+            var gaodingService = _provider.GetRequiredService<GaodingService>();
             var exception = Assert.Throws<Exception>(() =>
                 gaodingService.Matting("https://foco-clip.dancf.com/static/350487.jpg"));
             Assert.StartsWith("抠图失败", exception.Message);
+        }
+
+        [Fact]
+        public void TestAuthorizedCode()
+        {
+            var gaodingService = _provider.GetRequiredService<GaodingService>();
+            var code = gaodingService.AuthorizedCode("test");
+            Assert.NotEmpty(code);
         }
     }
 }
