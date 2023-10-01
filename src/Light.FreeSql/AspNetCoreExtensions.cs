@@ -13,20 +13,22 @@ namespace Light.FreeSql
     {
         public static IServiceCollection AddFreeSql(this IServiceCollection services, FreeSqlConfig config)
         {
-            services.AddSingleton<IFreeSql>(provider =>
+            services.AddSingleton(provider =>
             {
                 var freeSql = Build(provider, config);
                 config.FreeSqlSetup?.Invoke(provider, freeSql);
-                return new AsyncFreeSql(freeSql);
+                return freeSql;
             });
 
             return services;
         }
 
-        public static IServiceCollection AddFreeSql<T>(this IServiceCollection services, FreeSqlConfig<T> config)
-            where T : IEquatable<T>
+        public static IServiceCollection AddFreeSql<TAudit, TTenant>(this IServiceCollection services,
+            FreeSqlConfig<TAudit, TTenant> config)
+            where TAudit : IEquatable<TAudit>
+            where TTenant : IEquatable<TTenant>
         {
-            services.AddSingleton<IFreeSql>(provider =>
+            services.AddSingleton(provider =>
             {
                 var freeSql = Build(provider, config);
 
@@ -41,16 +43,16 @@ namespace Light.FreeSql
 
                     switch (e.Column.CsName)
                     {
-                        case nameof(ITenant<T>.Tenant) when e.Value == null:
+                        case nameof(ITenant<TTenant>.Tenant) when e.Value == null:
                             e.Value = config.ResolveTenant.Invoke(provider);
                             break;
                     }
                 };
-                freeSql.GlobalFilter.Apply<ITenant<T>>(nameof(ITenant<object>.Tenant),
+                freeSql.GlobalFilter.Apply<ITenant<TTenant>>(nameof(ITenant<object>.Tenant),
                     m => m.Tenant.Equals(config.ResolveTenant.Invoke(provider)));
 
                 config.FreeSqlSetup?.Invoke(provider, freeSql);
-                return new AsyncFreeSql(freeSql);
+                return freeSql;
             });
 
             return services;
@@ -76,6 +78,13 @@ namespace Light.FreeSql
 
             freeSql.Aop.ConfigEntity += (sender, args) =>
             {
+                if (args.EntityType.GetInterface(typeof(IId<>).Name) != null)
+                {
+                    freeSql.CodeFirst.ConfigEntity(args.EntityType,
+                        table => table.Property(nameof(IId<object>.Id)).IsPrimary(true).IsIdentity(true).Position(1)
+                    );
+                }
+
                 short index = -1;
 
                 if (typeof(ISoftDelete).IsAssignableFrom(args.EntityType))
@@ -89,26 +98,28 @@ namespace Light.FreeSql
                     });
                 }
 
-                if (args.EntityType.GetInterface(typeof(IId<>).Name) != null)
+                if (args.EntityType.GetInterface(typeof(ITenant<>).Name) != null)
                 {
                     var position = index;
                     index--;
-                    freeSql.CodeFirst.ConfigEntity(args.EntityType,
-                        table => table.Property(nameof(IId<object>.Id)).IsPrimary(true).IsIdentity(true).Position(1)
-                    );
+                    const string name = nameof(ITenant<object>.Tenant);
+                    freeSql.CodeFirst.ConfigEntity(args.EntityType, table =>
+                    {
+                        table.Index("idx_" + name, name);
+                        table.Property(name).Position(position);
+                    });
                 }
 
-                if (args.EntityType.GetInterface(nameof(ICreateAt)) != null)
+                if (args.EntityType.GetInterface(typeof(IUpdateBy<>).Name) != null)
                 {
                     var position = index;
                     index--;
-                    freeSql.CodeFirst.ConfigEntity(args.EntityType,
-                        table =>
-                        {
-                            table.Property(nameof(ICreateAt.CreateAt)).CanUpdate(false).Position(position)
-                                .ServerTime(DateTimeKind.Local);
-                        }
-                    );
+                    const string name = nameof(IUpdateBy<object>.UpdateBy);
+                    freeSql.CodeFirst.ConfigEntity(args.EntityType, table =>
+                    {
+                        table.Index("idx_" + name, name);
+                        table.Property(name).Position(position);
+                    });
                 }
 
                 if (args.EntityType.GetInterface(nameof(IUpdateAt)) != null)
@@ -124,15 +135,29 @@ namespace Light.FreeSql
                     );
                 }
 
-                if (args.EntityType.GetInterface(typeof(ITenant<>).Name) != null)
+                if (args.EntityType.GetInterface(typeof(ICreateBy<>).Name) != null)
                 {
                     var position = index;
                     index--;
+                    const string name = nameof(ICreateBy<object>.CreateBy);
                     freeSql.CodeFirst.ConfigEntity(args.EntityType, table =>
                     {
-                        table.Index("idx_" + nameof(ITenant<object>.Tenant), nameof(ITenant<object>.Tenant));
-                        table.Property(nameof(ITenant<object>.Tenant)).Position(position);
+                        table.Index("idx_" + name, name);
+                        table.Property(name).Position(position);
                     });
+                }
+
+                if (args.EntityType.GetInterface(nameof(ICreateAt)) != null)
+                {
+                    var position = index;
+                    index--;
+                    freeSql.CodeFirst.ConfigEntity(args.EntityType,
+                        table =>
+                        {
+                            table.Property(nameof(ICreateAt.CreateAt)).CanUpdate(false).Position(position)
+                                .ServerTime(DateTimeKind.Local);
+                        }
+                    );
                 }
             };
 
@@ -141,7 +166,6 @@ namespace Light.FreeSql
 
             return freeSql;
         }
-
 
         static ThreadLocal<ExpressionCallContext> context = new ThreadLocal<ExpressionCallContext>();
 
