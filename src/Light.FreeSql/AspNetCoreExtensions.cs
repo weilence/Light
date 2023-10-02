@@ -39,14 +39,19 @@ namespace Light.FreeSql
 
                 freeSql.Aop.AuditValue += (s, e) =>
                 {
-                    if (e.AuditValueType != AuditValueType.Insert) return;
-
-                    switch (e.Column.CsName)
-                    {
-                        case nameof(ITenant<TTenant>.Tenant) when e.Value == null:
-                            e.Value = config.ResolveTenant.Invoke(provider);
-                            break;
-                    }
+                    if (e.AuditValueType == AuditValueType.Insert)
+                        switch (e.Column.CsName)
+                        {
+                            case nameof(ITenant<TTenant>.Tenant):
+                                e.Value = config.ResolveTenant.Invoke(provider);
+                                break;
+                            case nameof(ICreateBy<TAudit>.CreateBy):
+                                e.Value = config.ResolveAudit.Invoke(provider);
+                                break;
+                            case nameof(IUpdateBy<TAudit>.UpdateBy):
+                                e.Value = config.ResolveAudit.Invoke(provider);
+                                break;
+                        }
                 };
                 freeSql.GlobalFilter.Apply<ITenant<TTenant>>(nameof(ITenant<object>.Tenant),
                     m => m.Tenant.Equals(config.ResolveTenant.Invoke(provider)));
