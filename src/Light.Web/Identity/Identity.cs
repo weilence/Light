@@ -2,7 +2,9 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Light.Web.Identity;
@@ -10,7 +12,7 @@ namespace Light.Web.Identity;
 public static class AspNetCoreExtensions
 {
     public static IServiceCollection AddJwtIdentity<T>(this IServiceCollection services, string jwtSecret,
-        Func<ClaimsPrincipal, T> parser)
+        Func<ClaimsPrincipal, T> func) where T : new()
     {
         services.AddAuthentication(x =>
         {
@@ -27,9 +29,21 @@ public static class AspNetCoreExtensions
         });
 
         services.AddHttpContextAccessor();
-        services.AddSingleton(new IdentityUserParser<T>(parser));
-        services.AddSingleton<IIdentityGetter, HttpContextIdentityGetter>();
+        return AddIdentity(services, provider =>
+        {
+            var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+            return new HttpContextIdentityStore<T>(httpContextAccessor, func);
+        });
+    }
+
+    public static IServiceCollection AddIdentity<T>(this IServiceCollection services,
+        Func<IServiceProvider, IIdentityStore<T>>? func = null) where T : new()
+    {
         services.AddSingleton<IdentityService<T>>();
+        if (func != null)
+        {
+            services.AddSingleton(func);
+        }
 
         return services;
     }
