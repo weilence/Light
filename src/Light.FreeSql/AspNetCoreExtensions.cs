@@ -123,7 +123,7 @@ namespace Light.FreeSql
                         table =>
                         {
                             table.Property(nameof(IUpdateAt.UpdateAt)).Position(position)
-                                .ServerTime(DateTimeKind.Local);
+                                .ServerTime(DateTimeKind.Utc);
                         }
                     );
                 }
@@ -148,7 +148,7 @@ namespace Light.FreeSql
                         table =>
                         {
                             table.Property(nameof(ICreateAt.CreateAt)).CanUpdate(false).Position(position)
-                                .ServerTime(DateTimeKind.Local);
+                                .ServerTime(DateTimeKind.Utc);
                         }
                     );
                 }
