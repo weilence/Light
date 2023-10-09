@@ -6,6 +6,7 @@ using FreeSql.Aop;
 using FreeSql.DataAnnotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Light.FreeSql
 {
@@ -165,9 +166,10 @@ namespace Light.FreeSql
 
             if (env.IsDevelopment())
             {
+                var logger = provider.GetRequiredService<ILogger<FreeSqlConfig>>();
                 builder = builder.UseAutoSyncStructure(true);
                 builder = builder.UseNoneCommandParameter(true)
-                    .UseMonitorCommand(m => Trace.WriteLine(m.CommandText));
+                    .UseMonitorCommand(m => logger.LogDebug("{Message}", m.CommandText));
             }
 
             config.BuilderSetup?.Invoke(provider, builder);

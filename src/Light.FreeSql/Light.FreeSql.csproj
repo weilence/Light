@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <Version>0.0.4.4-prelease.5</Version>
+        <Version>0.0.4.4-prelease.6</Version>
     </PropertyGroup>
 
     <ItemGroup>
@@ -11,6 +11,7 @@
       <PackageReference Include="FreeSql.Repository" Version="3.2.801" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
       <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
       <PackageReference Include="Rougamo.Fody" Version="1.4.1" />
     </ItemGroup>
 
