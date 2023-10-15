@@ -75,83 +75,38 @@ namespace Light.FreeSql
                 if (args.EntityType.GetInterface(typeof(IId<>).Name) != null)
                 {
                     freeSql.CodeFirst.ConfigEntity(args.EntityType,
-                        table => table.Property(nameof(IId<object>.Id)).IsPrimary(true).IsIdentity(true).Position(1)
+                        table => table.Property(nameof(IId<object>.Id)).IsPrimary(true).IsIdentity(true)
                     );
                 }
 
-                short index = -1;
-
-                if (typeof(ISoftDelete).IsAssignableFrom(args.EntityType))
+                var isSoftDelete = typeof(ISoftDelete).IsAssignableFrom(args.EntityType);
+                var isTenant = args.EntityType.GetInterface(typeof(ITenant<>).Name) != null;
+                const string softDeleteName = nameof(ISoftDelete.IsDelete);
+                const string tenantName = nameof(ITenant<object>.Tenant);
+                var tableName = args.ModifyResult.Name;
+                switch (isSoftDelete, isTenant)
                 {
-                    var position = index;
-                    index--;
-                    freeSql.CodeFirst.ConfigEntity(args.EntityType, table =>
+                    case (true, true):
                     {
-                        table.Index("idx_" + nameof(ISoftDelete.IsDelete), nameof(ISoftDelete.IsDelete));
-                        table.Property(nameof(ISoftDelete.IsDelete)).Position(position);
-                    });
-                }
-
-                if (args.EntityType.GetInterface(typeof(ITenant<>).Name) != null)
-                {
-                    var position = index;
-                    index--;
-                    const string name = nameof(ITenant<object>.Tenant);
-                    freeSql.CodeFirst.ConfigEntity(args.EntityType, table =>
-                    {
-                        table.Index("idx_" + name, name);
-                        table.Property(name).Position(position);
-                    });
-                }
-
-                if (args.EntityType.GetInterface(typeof(IUpdateBy<>).Name) != null)
-                {
-                    var position = index;
-                    index--;
-                    const string name = nameof(IUpdateBy<object>.UpdateBy);
-                    freeSql.CodeFirst.ConfigEntity(args.EntityType, table =>
-                    {
-                        table.Index("idx_" + name, name);
-                        table.Property(name).Position(position);
-                    });
-                }
-
-                if (args.EntityType.GetInterface(nameof(IUpdateAt)) != null)
-                {
-                    var position = index;
-                    index--;
-                    freeSql.CodeFirst.ConfigEntity(args.EntityType,
-                        table =>
+                        freeSql.CodeFirst.ConfigEntity(args.EntityType, table =>
                         {
-                            table.Property(nameof(IUpdateAt.UpdateAt)).Position(position)
-                                .ServerTime(DateTimeKind.Utc);
-                        }
-                    );
-                }
-
-                if (args.EntityType.GetInterface(typeof(ICreateBy<>).Name) != null)
-                {
-                    var position = index;
-                    index--;
-                    const string name = nameof(ICreateBy<object>.CreateBy);
-                    freeSql.CodeFirst.ConfigEntity(args.EntityType, table =>
+                            table.Index($"idx_{tableName}_{tenantName}_{softDeleteName}",
+                                $"{tenantName}, {softDeleteName}");
+                        });
+                    }
+                        break;
+                    case (true, false):
                     {
-                        table.Index("idx_" + name, name);
-                        table.Property(name).Position(position);
-                    });
-                }
-
-                if (args.EntityType.GetInterface(nameof(ICreateAt)) != null)
-                {
-                    var position = index;
-                    index--;
-                    freeSql.CodeFirst.ConfigEntity(args.EntityType,
-                        table =>
-                        {
-                            table.Property(nameof(ICreateAt.CreateAt)).CanUpdate(false).Position(position)
-                                .ServerTime(DateTimeKind.Utc);
-                        }
-                    );
+                        freeSql.CodeFirst.ConfigEntity(args.EntityType,
+                            table => { table.Index($"idx_{tableName}_{softDeleteName}", softDeleteName); });
+                    }
+                        break;
+                    case (false, true):
+                    {
+                        freeSql.CodeFirst.ConfigEntity(args.EntityType,
+                            table => { table.Index($"idx_{tableName}_{tenantName}", tenantName); });
+                    }
+                        break;
                 }
             };
         }
