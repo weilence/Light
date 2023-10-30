@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Threading;
 using FreeSql;
 using FreeSql.Aop;
@@ -43,18 +42,29 @@ namespace Light.FreeSql
 
             freeSql.Aop.AuditValue += (s, e) =>
             {
-                if (e.AuditValueType != AuditValueType.Insert) return;
-                switch (e.Column.CsName)
+                if (e.AuditValueType == AuditValueType.Insert || e.AuditValueType == AuditValueType.InsertOrUpdate)
                 {
-                    case nameof(ITenant<TTenant>.Tenant) when hasTenant:
-                        e.Value = config.ResolveTenant.Invoke(provider);
-                        break;
-                    case nameof(ICreateBy<TAudit>.CreateBy) when hasAudit:
-                        e.Value = config.ResolveAudit.Invoke(provider);
-                        break;
-                    case nameof(IUpdateBy<TAudit>.UpdateBy) when hasAudit:
-                        e.Value = config.ResolveAudit.Invoke(provider);
-                        break;
+                    switch (e.Column.CsName)
+                    {
+                        case nameof(ITenant<TTenant>.Tenant) when hasTenant:
+                            e.Value = config.ResolveTenant.Invoke(provider);
+                            break;
+                        case nameof(ICreateBy<TAudit>.CreateBy) when hasAudit:
+                            e.Value = config.ResolveAudit.Invoke(provider);
+                            break;
+                        case nameof(IUpdateBy<TAudit>.UpdateBy) when hasAudit:
+                            e.Value = config.ResolveAudit.Invoke(provider);
+                            break;
+                    }
+                }
+                else if (e.AuditValueType == AuditValueType.Update)
+                {
+                    switch (e.Column.CsName)
+                    {
+                        case nameof(IUpdateBy<TAudit>.UpdateBy) when hasAudit:
+                            e.Value = config.ResolveAudit.Invoke(provider);
+                            break;
+                    }
                 }
             };
 
@@ -76,6 +86,28 @@ namespace Light.FreeSql
                 {
                     freeSql.CodeFirst.ConfigEntity(args.EntityType,
                         table => table.Property(nameof(IId<object>.Id)).IsPrimary(true).IsIdentity(true)
+                    );
+                }
+
+                if (args.EntityType.GetInterface(typeof(ICreateBy<>).Name) != null)
+                {
+                    freeSql.CodeFirst.ConfigEntity(args.EntityType,
+                        table => table.Property(nameof(ICreateBy<object>.CreateBy)).CanUpdate(false)
+                    );
+                }
+
+                if (args.EntityType.GetInterface(nameof(ICreateAt)) != null)
+                {
+                    freeSql.CodeFirst.ConfigEntity(args.EntityType,
+                        table => table.Property(nameof(ICreateAt.CreateAt)).ServerTime(DateTimeKind.Local)
+                            .CanUpdate(false)
+                    );
+                }
+
+                if (args.EntityType.GetInterface(nameof(IUpdateAt)) != null)
+                {
+                    freeSql.CodeFirst.ConfigEntity(args.EntityType,
+                        table => table.Property(nameof(IUpdateAt.UpdateAt)).ServerTime(DateTimeKind.Local)
                     );
                 }
 
