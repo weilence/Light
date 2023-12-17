@@ -11,18 +11,16 @@ namespace Light.FreeSql
 {
     public static class AspNetCoreExtensions
     {
-        public static IServiceCollection AddFreeSql<TAudit, TTenant>(this IServiceCollection services,
-            FreeSqlConfig<TAudit, TTenant> config)
-            where TAudit : IEquatable<TAudit>
-            where TTenant : IEquatable<TTenant>
+        public static IServiceCollection AddFreeSql(this IServiceCollection services,
+            FreeSqlConfig config)
         {
             services.AddSingleton(provider =>
             {
                 var freeSql = Build(provider, config);
 
-                Aop<TAudit, TTenant>(freeSql);
+                Aop(freeSql);
 
-                Filter(provider, freeSql, config);
+                Filter(provider, freeSql);
 
                 freeSql.UseJsonMap();
 
@@ -33,12 +31,13 @@ namespace Light.FreeSql
             return services;
         }
 
-        private static void Filter<TAudit, TTenant>(IServiceProvider provider, IFreeSql freeSql,
-            FreeSqlConfig<TAudit, TTenant> config)
-            where TAudit : IEquatable<TAudit> where TTenant : IEquatable<TTenant>
+        private static void Filter(IServiceProvider provider, IFreeSql freeSql)
         {
-            var hasTenant = config.ResolveTenant != null;
-            var hasAudit = config.ResolveAudit != null;
+            var auditProvider = provider.GetService<IAuditProvider>();
+            var hasAudit = auditProvider != null;
+
+            var tenantProvider = provider.GetService<ITenantProvider>();
+            var hasTenant = tenantProvider != null;
 
             freeSql.Aop.AuditValue += (s, e) =>
             {
@@ -46,14 +45,14 @@ namespace Light.FreeSql
                 {
                     switch (e.Column.CsName)
                     {
-                        case nameof(ITenant<TTenant>.Tenant) when hasTenant:
-                            e.Value = config.ResolveTenant.Invoke(provider);
+                        case nameof(ITenant<object>.Tenant) when hasTenant:
+                            e.Value = tenantProvider!.Tenant;
                             break;
-                        case nameof(ICreateBy<TAudit>.CreateBy) when hasAudit:
-                            e.Value = config.ResolveAudit.Invoke(provider);
+                        case nameof(ICreateBy<object>.CreateBy) when hasAudit:
+                            e.Value = auditProvider!.UserId;
                             break;
-                        case nameof(IUpdateBy<TAudit>.UpdateBy) when hasAudit:
-                            e.Value = config.ResolveAudit.Invoke(provider);
+                        case nameof(IUpdateBy<object>.UpdateBy) when hasAudit:
+                            e.Value = auditProvider!.UserId;
                             break;
                     }
                 }
@@ -61,8 +60,8 @@ namespace Light.FreeSql
                 {
                     switch (e.Column.CsName)
                     {
-                        case nameof(IUpdateBy<TAudit>.UpdateBy) when hasAudit:
-                            e.Value = config.ResolveAudit.Invoke(provider);
+                        case nameof(IUpdateBy<object>.UpdateBy) when hasAudit:
+                            e.Value = auditProvider!.UserId;
                             break;
                     }
                 }
@@ -70,15 +69,14 @@ namespace Light.FreeSql
 
             if (hasTenant)
             {
-                freeSql.GlobalFilter.Apply<ITenant<TTenant>>(nameof(ITenant<TTenant>.Tenant),
-                    m => m.Tenant.Equals(config.ResolveTenant.Invoke(provider)));
+                freeSql.GlobalFilter.Apply<ITenant<object>>(nameof(ITenant<object>.Tenant),
+                    m => m.Tenant.Equals(tenantProvider.Tenant));
             }
 
             freeSql.GlobalFilter.Apply<ISoftDelete>(nameof(ISoftDelete.IsDelete), m => m.IsDelete == false);
         }
 
-        private static void Aop<TAudit, TTenant>(IFreeSql freeSql)
-            where TAudit : IEquatable<TAudit> where TTenant : IEquatable<TTenant>
+        private static void Aop(IFreeSql freeSql)
         {
             freeSql.Aop.ConfigEntity += (sender, args) =>
             {
@@ -115,14 +113,13 @@ namespace Light.FreeSql
                 var isTenant = args.EntityType.GetInterface(typeof(ITenant<>).Name) != null;
                 const string softDeleteName = nameof(ISoftDelete.IsDelete);
                 const string tenantName = nameof(ITenant<object>.Tenant);
-                var tableName = args.ModifyResult.Name;
                 switch (isSoftDelete, isTenant)
                 {
                     case (true, true):
                     {
                         freeSql.CodeFirst.ConfigEntity(args.EntityType, table =>
                         {
-                            table.Index($"idx_{tableName}_{tenantName}_{softDeleteName}",
+                            table.Index($"{{tableName}}_idx_{tenantName}_{softDeleteName}",
                                 $"{tenantName}, {softDeleteName}");
                         });
                     }
@@ -130,21 +127,20 @@ namespace Light.FreeSql
                     case (true, false):
                     {
                         freeSql.CodeFirst.ConfigEntity(args.EntityType,
-                            table => { table.Index($"idx_{tableName}_{softDeleteName}", softDeleteName); });
+                            table => { table.Index($"{{tableName}}_idx_{softDeleteName}", softDeleteName); });
                     }
                         break;
                     case (false, true):
                     {
                         freeSql.CodeFirst.ConfigEntity(args.EntityType,
-                            table => { table.Index($"idx_{tableName}_{tenantName}", tenantName); });
+                            table => { table.Index($"{{tableName}}_idx_{tenantName}", tenantName); });
                     }
                         break;
                 }
             };
         }
 
-        private static IFreeSql Build<TAudit, TTenant>(IServiceProvider provider, FreeSqlConfig<TAudit, TTenant> config)
-            where TAudit : IEquatable<TAudit> where TTenant : IEquatable<TTenant>
+        private static IFreeSql Build(IServiceProvider provider, FreeSqlConfig config)
         {
             var env = provider.GetService<IHostEnvironment>();
             var builder = new FreeSqlBuilder()
@@ -153,7 +149,8 @@ namespace Light.FreeSql
 
             if (env.IsDevelopment())
             {
-                var logger = provider.GetRequiredService<ILogger<FreeSqlConfig>>();
+                var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
+                var logger = loggerFactory.CreateLogger(nameof(FreeSql));
                 builder = builder.UseAutoSyncStructure(true);
                 builder = builder.UseNoneCommandParameter(true)
                     .UseMonitorCommand(m => logger.LogDebug("{Message}", m.CommandText));
