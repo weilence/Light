@@ -164,66 +164,6 @@ namespace Light.FreeSql
             return freeSql;
         }
 
-        public static IFreeSql UseJson(this IFreeSql freeSql)
-        {
-            freeSql.Aop.ConfigEntityProperty += (s, e) =>
-            {
-                var attr = e.Property.GetCustomAttributes(typeof(JsonObjectAttribute), false).FirstOrDefault() as JsonObjectAttribute;
-                if (attr == null)
-                {
-                    return;
-                }
-
-                switch (freeSql.Ado.DataType)
-                {
-                    case DataType.PostgreSQL:
-                        e.ModifyResult.DbType = "jsonb";
-                        RegisterPocoType(e.Property.PropertyType);
-                        break;
-                    default:
-                        throw new NotSupportedException($"JsonAttribute is not supported for {freeSql.Ado.DataType}");
-                }
-            };
-
-            return freeSql;
-        }
-
-        private static void RegisterPocoType(Type pocoType)
-        {
-            var methodJsonConvertDeserializeObject = typeof(JsonSerializer).GetMethod(nameof(JsonSerializer.Deserialize), new[]
-            {
-                typeof(string),
-                typeof(Type),
-                typeof(JsonSerializerOptions),
-            });
-            var methodJsonConvertSerializeObject = typeof(JsonSerializer).GetMethod(nameof(JsonSerializer.Serialize), new[]
-            {
-                typeof(object),
-                typeof(Type),
-                typeof(JsonSerializerOptions),
-            });
-
-            var jsonSerializerOptions = new JsonSerializerOptions();
-            Utils.dicExecuteArrayRowReadClassOrTuple[pocoType] = true;
-            Utils.GetDataReaderValueBlockExpressionObjectToStringIfThenElse.Add(
-                (returnTarget, valueExp, elseExp, type) =>
-                    Expression.IfThenElse(Expression.TypeIs(valueExp, pocoType),
-                        Expression.Return(returnTarget,
-                            Expression.Call(methodJsonConvertSerializeObject, Expression.Convert(valueExp, typeof(object)), Expression.Constant(type),
-                                Expression.Constant(jsonSerializerOptions)),
-                            typeof(object)), elseExp));
-            Utils.GetDataReaderValueBlockExpressionSwitchTypeFullName.Add((returnTarget, valueExp, type) =>
-            {
-                if (type == pocoType)
-                    return Expression.Return(returnTarget,
-                        Expression.TypeAs(
-                            Expression.Call(methodJsonConvertDeserializeObject, Expression.Convert(valueExp, typeof(string)), Expression.Constant(type),
-                                Expression.Constant(jsonSerializerOptions)),
-                            type));
-                return null;
-            });
-        }
-
         static ThreadLocal<ExpressionCallContext> context = new ThreadLocal<ExpressionCallContext>();
 
         [ExpressionCall]
