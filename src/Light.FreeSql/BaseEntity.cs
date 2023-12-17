@@ -1,5 +1,4 @@
 ﻿using System;
-using FreeSql.DataAnnotations;
 
 namespace Light.FreeSql
 {

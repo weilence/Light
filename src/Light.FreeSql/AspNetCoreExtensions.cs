@@ -1,12 +1,8 @@
 using System;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text.Json;
 using System.Threading;
 using FreeSql;
 using FreeSql.Aop;
 using FreeSql.DataAnnotations;
-using FreeSql.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
