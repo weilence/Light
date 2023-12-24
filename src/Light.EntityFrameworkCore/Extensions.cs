@@ -53,7 +53,7 @@ public static class Extensions
 
             if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
             {
-                dicExpression[nameof(ISoftDelete)] = (CreateSoftDeleteExpression(parameter));
+                dicExpression[nameof(ISoftDelete)] = CreateSoftDeleteExpression(parameter);
             }
 
             if (typeof(ITenant<T>).IsAssignableFrom(entityType.ClrType))
@@ -61,6 +61,7 @@ public static class Extensions
                 ArgumentNullException.ThrowIfNull(tenantProvider);
 
                 dicExpression[nameof(ITenant<T>)] = CreateTenantExpression(parameter, tenantProvider);
+                modelBuilder.Entity(entityType.ClrType).HasIndex(nameof(ITenant<T>.Tenant));
             }
 
             if (dicExpression.Count > 0)
@@ -138,8 +139,13 @@ public static class Extensions
         return condition ? query.Where(predicate) : query;
     }
 
-    public static (long, List<T>) ToPage<T>(this IOrderedQueryable<T> query, int page, int size)
+    public static (long, List<T>) ToPage<T>(this IQueryable<T> query, int page, int size)
     {
+        if (query is not IOrderedQueryable<T>)
+        {
+            throw new Exception("ToPage must be used after OrderBy");
+        }
+
         var total = query.LongCount();
         var data = query.Skip((page - 1) * size).Take(size).ToList();
 
