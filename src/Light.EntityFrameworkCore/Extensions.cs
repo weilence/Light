@@ -32,7 +32,7 @@ public static class Extensions
                     typeof(T),
                 }, parameter,
                 Expression.Constant(nameof(ITenant<T>.Tenant))),
-            Expression.Constant(tenantProvider.Tenant));
+            Expression.Property(Expression.Constant(tenantProvider), nameof(tenantProvider.Tenant)));
 
         return body;
     }
@@ -147,7 +147,15 @@ public static class Extensions
         }
 
         var total = query.LongCount();
-        var data = query.Skip((page - 1) * size).Take(size).ToList();
+        List<T> data;
+        if (page == 0 && size == 0)
+        {
+            data = query.ToList();
+        }
+        else
+        {
+            data = query.Skip((page - 1) * size).Take(size).ToList();
+        }
 
         return (total, data);
     }
