@@ -116,6 +116,23 @@ public static class Extensions
                 }
 
                 break;
+            case EntityState.Deleted:
+                if (e.Entry.Entity is ISoftDelete softDeleteEntity)
+                {
+                    e.Entry.State = EntityState.Modified;
+                    softDeleteEntity.IsDelete = true;
+                    if (e.Entry.Entity is IUpdateAt updateAtEntityDelete)
+                    {
+                        updateAtEntityDelete.UpdateAt = DateTime.UtcNow;
+                    }
+
+                    if (e.Entry.Entity is IUpdateBy<T> updateByEntityDelete)
+                    {
+                        updateByEntityDelete.UpdateBy = auditProvider.Audit;
+                    }
+                }
+
+                break;
         }
     }
 
