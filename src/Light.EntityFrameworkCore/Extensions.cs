@@ -24,7 +24,7 @@ public static class Extensions
     }
 
     // EF.Property<T>(e, nameof(ITenant<T>.Tenant)) == tenantProvider.Tenant
-    private static Expression CreateTenantExpression<T>(ParameterExpression parameter, ITenantProvider<T> tenantProvider)
+    private static Expression CreateTenantExpression<T>(ParameterExpression parameter, Expression tenantExpression)
     {
         var body = Expression.Equal(
             Expression.Call(typeof(EF), nameof(EF.Property), new[]
@@ -32,7 +32,8 @@ public static class Extensions
                     typeof(T),
                 }, parameter,
                 Expression.Constant(nameof(ITenant<T>.Tenant))),
-            Expression.Property(Expression.Constant(tenantProvider), nameof(tenantProvider.Tenant)));
+            tenantExpression
+        );
 
         return body;
     }
@@ -44,7 +45,7 @@ public static class Extensions
         return Expression.Lambda(joinExpression, parameter);
     }
 
-    public static ModelBuilder AddFilter<T>(this ModelBuilder modelBuilder, ITenantProvider<T>? tenantProvider = null)
+    public static ModelBuilder AddFilter<T>(this ModelBuilder modelBuilder, Expression? tenantExpression = null)
     {
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
@@ -58,9 +59,9 @@ public static class Extensions
 
             if (typeof(ITenant<T>).IsAssignableFrom(entityType.ClrType))
             {
-                ArgumentNullException.ThrowIfNull(tenantProvider);
+                ArgumentNullException.ThrowIfNull(tenantExpression);
 
-                dicExpression[nameof(ITenant<T>)] = CreateTenantExpression(parameter, tenantProvider);
+                dicExpression[nameof(ITenant<T>)] = CreateTenantExpression<T>(parameter, tenantExpression);
                 modelBuilder.Entity(entityType.ClrType).HasIndex(nameof(ITenant<T>.Tenant));
             }
 
