@@ -2,37 +2,37 @@
 
 public interface ICreateAt
 {
-    public DateTime CreateAt { get; set; }
+    DateTime CreateAt { get; set; }
 }
 
 public interface ICreateBy<T>
 {
-    public T CreateBy { get; set; }
+    T CreateBy { get; set; }
 }
 
 public interface IUpdateAt
 {
-    public DateTime UpdateAt { get; set; }
+    DateTime UpdateAt { get; set; }
 }
 
 public interface IUpdateBy<T>
 {
-    public T UpdateBy { get; set; }
+    T UpdateBy { get; set; }
 }
 
 public interface ISoftDelete
 {
-    public bool IsDelete { get; set; }
+    bool IsDelete { get; set; }
 }
 
 public interface ITenant<T>
 {
-    public T Tenant { get; set; }
+    T Tenant { get; set; }
 }
 
 public interface IId<T>
 {
-    public T Id { get; set; }
+    T Id { get; set; }
 }
 
 public class BaseEntity<T> : IId<T>, ICreateAt, ICreateBy<T>, IUpdateAt, IUpdateBy<T>, ISoftDelete

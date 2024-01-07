@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.Summary.Test", "src\L
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.EntityFrameworkCore", "src\Light.EntityFrameworkCore\Light.EntityFrameworkCore.csproj", "{BD5EFD11-F4FF-4F3B-8364-A9148BEB2063}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.EntityFrameworkCore.Transactional", "src\Light.EntityFrameworkCore.Transactional\Light.EntityFrameworkCore.Transactional.csproj", "{4F27C44E-741D-46B9-A3E0-CCD5F0E93B7A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{BD5EFD11-F4FF-4F3B-8364-A9148BEB2063}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD5EFD11-F4FF-4F3B-8364-A9148BEB2063}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD5EFD11-F4FF-4F3B-8364-A9148BEB2063}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F27C44E-741D-46B9-A3E0-CCD5F0E93B7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F27C44E-741D-46B9-A3E0-CCD5F0E93B7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F27C44E-741D-46B9-A3E0-CCD5F0E93B7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F27C44E-741D-46B9-A3E0-CCD5F0E93B7A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

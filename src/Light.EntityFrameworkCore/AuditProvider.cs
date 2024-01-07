@@ -2,5 +2,5 @@
 
 public interface IAuditProvider<out T>
 {
-    public T Audit { get; }
+    T Audit { get; }
 }

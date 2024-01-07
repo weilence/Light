@@ -2,5 +2,5 @@
 
 public interface ITenantProvider<out T>
 {
-    public T Tenant { get; }
+    T Tenant { get; }
 }

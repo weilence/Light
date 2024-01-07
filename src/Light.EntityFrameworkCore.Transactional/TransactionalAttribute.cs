@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Rougamo.Context;
 
-namespace Light.EntityFrameworkCore
+namespace Light.EntityFrameworkCore.Transactional
 {
     [AttributeUsage(AttributeTargets.Method)]
     public class TransactionalAttribute : Rougamo.MoAttribute
@@ -52,7 +52,7 @@ namespace Light.EntityFrameworkCore
 
     public class DbContextTransactionCounter
     {
-        public IDbContextTransaction Transaction { get; set; }
+        public IDbContextTransaction Transaction { get; set; } = null!;
         public uint Count { get; set; }
     }
 }
