@@ -6,66 +6,11 @@ namespace Light.EntityFrameworkCore;
 
 public static class ExtensionMethods
 {
-    // EF.Property<bool>(e, nameof(ISoftDelete.IsDelete)) == false
-    private static Expression CreateSoftDeleteExpression(ParameterExpression parameter)
+    public static ModelBuilder AddFilter(this ModelBuilder modelBuilder, Action<QueryFilterBuilder> action)
     {
-        var body = Expression.Equal(
-            Expression.Call(typeof(EF), nameof(EF.Property), new[]
-                {
-                    typeof(bool),
-                }, parameter,
-                Expression.Constant(nameof(ISoftDelete.IsDelete))),
-            Expression.Constant(false));
-
-        return body;
-    }
-
-    // EF.Property<T>(e, nameof(ITenant<T>.Tenant)) == tenantProvider.Tenant
-    private static Expression CreateTenantExpression<T>(ParameterExpression parameter, Expression tenantExpression)
-    {
-        var body = Expression.Equal(
-            Expression.Call(typeof(EF), nameof(EF.Property), new[]
-                {
-                    typeof(T),
-                }, parameter,
-                Expression.Constant(nameof(ITenant<T>.Tenant))),
-            tenantExpression
-        );
-
-        return body;
-    }
-
-    private static LambdaExpression CreateFilterExpression(ParameterExpression parameter, IEnumerable<Expression> expressions)
-    {
-        var joinExpression = expressions.Aggregate(Expression.AndAlso);
-        return Expression.Lambda(joinExpression, parameter);
-    }
-
-    public static ModelBuilder AddFilter<T>(this ModelBuilder modelBuilder, Expression? tenantExpression = null)
-    {
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-        {
-            var expressions = new List<Expression>();
-            var parameter = Expression.Parameter(entityType.ClrType);
-
-            if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
-            {
-                expressions.Add(CreateSoftDeleteExpression(parameter));
-            }
-
-            if (typeof(ITenant<T>).IsAssignableFrom(entityType.ClrType))
-            {
-                ArgumentNullException.ThrowIfNull(tenantExpression);
-
-                expressions.Add(CreateTenantExpression<T>(parameter, tenantExpression));
-                modelBuilder.Entity(entityType.ClrType).HasIndex(nameof(ITenant<T>.Tenant));
-            }
-
-            if (expressions.Count > 0)
-            {
-                modelBuilder.Entity(entityType.ClrType).HasQueryFilter(CreateFilterExpression(parameter, expressions));
-            }
-        }
+        var queryFilterBuilder = new QueryFilterBuilder(modelBuilder);
+        action(queryFilterBuilder);
+        queryFilterBuilder.Build();
 
         return modelBuilder;
     }
