@@ -1,14 +1,11 @@
-﻿using System.Collections.Concurrent;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Light.EntityFrameworkCore;
 
-public static class Extensions
+public static class ExtensionMethods
 {
-    private static ConcurrentDictionary<Type, (ParameterExpression, Dictionary<string, Expression>)> _dicExpression = new();
-
     // EF.Property<bool>(e, nameof(ISoftDelete.IsDelete)) == false
     private static Expression CreateSoftDeleteExpression(ParameterExpression parameter)
     {
@@ -41,7 +38,6 @@ public static class Extensions
     private static LambdaExpression CreateFilterExpression(ParameterExpression parameter, IEnumerable<Expression> expressions)
     {
         var joinExpression = expressions.Aggregate(Expression.AndAlso);
-
         return Expression.Lambda(joinExpression, parameter);
     }
 
@@ -49,27 +45,25 @@ public static class Extensions
     {
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            var dicExpression = new Dictionary<string, Expression>();
+            var expressions = new List<Expression>();
             var parameter = Expression.Parameter(entityType.ClrType);
 
             if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
             {
-                dicExpression[nameof(ISoftDelete)] = CreateSoftDeleteExpression(parameter);
+                expressions.Add(CreateSoftDeleteExpression(parameter));
             }
 
             if (typeof(ITenant<T>).IsAssignableFrom(entityType.ClrType))
             {
                 ArgumentNullException.ThrowIfNull(tenantExpression);
 
-                dicExpression[nameof(ITenant<T>)] = CreateTenantExpression<T>(parameter, tenantExpression);
+                expressions.Add(CreateTenantExpression<T>(parameter, tenantExpression));
                 modelBuilder.Entity(entityType.ClrType).HasIndex(nameof(ITenant<T>.Tenant));
             }
 
-            if (dicExpression.Count > 0)
+            if (expressions.Count > 0)
             {
-                _dicExpression.TryAdd(entityType.ClrType, (parameter, dicExpression));
-
-                modelBuilder.Entity(entityType.ClrType).HasQueryFilter(CreateFilterExpression(parameter, dicExpression.Values));
+                modelBuilder.Entity(entityType.ClrType).HasQueryFilter(CreateFilterExpression(parameter, expressions));
             }
         }
 
@@ -135,16 +129,6 @@ public static class Extensions
 
                 break;
         }
-    }
-
-    public static IQueryable<T> DisableTenant<T>(this IQueryable<T> query) where T : class
-    {
-        var (parameter, expressions) = _dicExpression[typeof(T)];
-
-        return query.IgnoreQueryFilters().Where((Expression<Func<T, bool>>)CreateFilterExpression(parameter, new[]
-        {
-            expressions[nameof(ISoftDelete)],
-        }));
     }
 
     public static IQueryable<T> WhereIf<T>(this IQueryable<T> query, bool condition, Expression<Func<T, bool>> predicate)
