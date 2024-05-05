@@ -3,12 +3,16 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>1.0.0-prelease.1</Version>
+        <Version>1.0.0-prelease.2</Version>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Fody" Version="6.8.0">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.0" />
-        <PackageReference Include="Rougamo.Fody" Version="2.1.1" PrivateAssets="contentfiles;analyzers" />
+        <PackageReference Include="Rougamo.Fody" Version="3.0.0" PrivateAssets="contentfiles;analyzers" />
     </ItemGroup>
 </Project>

@@ -50,7 +50,7 @@ namespace Light.EntityFrameworkCore.Transactional
         }
     }
 
-    public class DbContextTransactionCounter
+    internal class DbContextTransactionCounter
     {
         public IDbContextTransaction Transaction { get; set; } = null!;
         public uint Count { get; set; }
