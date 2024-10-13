@@ -16,6 +16,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.EntityFrameworkCore",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.EntityFrameworkCore.Transactional", "src\Light.EntityFrameworkCore.Transactional\Light.EntityFrameworkCore.Transactional.csproj", "{4F27C44E-741D-46B9-A3E0-CCD5F0E93B7A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.Crx", "src\Light.Crx\Light.Crx.csproj", "{D37BBCBE-6EA4-4EC8-A267-734DEDE882B4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{F7E693B2-1840-4D49-973E-23CDD52E2DA6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.Crx.Test", "tests\Light.Crx.Test\Light.Crx.Test.csproj", "{872AE21B-DCE5-4EFD-ADCC-2BA24F8AFCE5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,5 +60,19 @@ Global
 		{4F27C44E-741D-46B9-A3E0-CCD5F0E93B7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F27C44E-741D-46B9-A3E0-CCD5F0E93B7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F27C44E-741D-46B9-A3E0-CCD5F0E93B7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D37BBCBE-6EA4-4EC8-A267-734DEDE882B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D37BBCBE-6EA4-4EC8-A267-734DEDE882B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D37BBCBE-6EA4-4EC8-A267-734DEDE882B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D37BBCBE-6EA4-4EC8-A267-734DEDE882B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{872AE21B-DCE5-4EFD-ADCC-2BA24F8AFCE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{872AE21B-DCE5-4EFD-ADCC-2BA24F8AFCE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{872AE21B-DCE5-4EFD-ADCC-2BA24F8AFCE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{872AE21B-DCE5-4EFD-ADCC-2BA24F8AFCE5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{872AE21B-DCE5-4EFD-ADCC-2BA24F8AFCE5} = {F7E693B2-1840-4D49-973E-23CDD52E2DA6}
 	EndGlobalSection
 EndGlobal
