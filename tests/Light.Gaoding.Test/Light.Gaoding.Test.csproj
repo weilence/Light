@@ -23,7 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Light.Gaoding\Light.Gaoding.csproj" />
+      <ProjectReference Include="..\..\src\Light.Gaoding\Light.Gaoding.csproj" />
     </ItemGroup>
 
 </Project>

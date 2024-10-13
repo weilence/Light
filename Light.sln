@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.Gaoding", "src\Light.Gaoding\Light.Gaoding.csproj", "{09C0BC7A-23AB-4B5D-987E-00997DEF94C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.Gaoding.Test", "src\Light.Gaoding.Test\Light.Gaoding.Test.csproj", "{288F859A-B5B2-456C-984E-74B2A053CD0B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.Gaoding.Test", "tests\Light.Gaoding.Test\Light.Gaoding.Test.csproj", "{288F859A-B5B2-456C-984E-74B2A053CD0B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.FreeSql", "src\Light.FreeSql\Light.FreeSql.csproj", "{0A023779-AB26-4FF2-A544-908916F84633}"
 EndProject
@@ -10,7 +10,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.Web", "src\Light.Web\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.Summary", "src\Light.Summary\Light.Summary.csproj", "{9184BABC-D845-4553-B0B6-6978DF935C5C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.Summary.Test", "src\Light.Summary.Test\Light.Summary.Test.csproj", "{F8298E7A-01D8-4127-811A-D4AAC462410D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.Summary.Test", "tests\Light.Summary.Test\Light.Summary.Test.csproj", "{F8298E7A-01D8-4127-811A-D4AAC462410D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Light.EntityFrameworkCore", "src\Light.EntityFrameworkCore\Light.EntityFrameworkCore.csproj", "{BD5EFD11-F4FF-4F3B-8364-A9148BEB2063}"
 EndProject
