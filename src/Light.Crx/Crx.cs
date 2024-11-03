@@ -9,11 +9,22 @@ public class Crx : IDisposable
 {
     public string Id { get; }
     public Manifest Manifest { get; }
-    private readonly MemoryStream memoryStream;
-    private readonly ZipArchive _content;
-    private readonly Translator _translator;
 
-    public Crx(Stream stream)
+    private readonly ZipArchive _zipArchive;
+
+    private readonly Translator _translator;
+    private readonly IconExtractor _iconExtractor;
+
+    private Crx(string id, ZipArchive zipArchive)
+    {
+        Id = id;
+        _zipArchive = zipArchive;
+        Manifest = ExtractManifest(_zipArchive);
+        _translator = new Translator(Manifest.DefaultLocale, _zipArchive);
+        _iconExtractor = new IconExtractor(_zipArchive);
+    }
+
+    public static Crx FromStream(Stream stream)
     {
         using var reader = new BinaryReader(stream, Encoding.ASCII, true);
 
@@ -31,20 +42,25 @@ public class Crx : IDisposable
         var n = reader.ReadUInt32();
         var hdr = CrxFileHeader.Parser.ParseFrom(reader.ReadBytes((int)n));
 
-        memoryStream = new MemoryStream();
-        stream.CopyTo(memoryStream);
-
-        Id = CrxId(hdr);
-        _content = new ZipArchive(memoryStream, ZipArchiveMode.Read);
-        var manifestEntry = _content.GetEntry("manifest.json") ?? throw new Exception("manifest.json not found");
-        using var manifestStream = manifestEntry.Open();
-        Manifest = JsonSerializer.Deserialize<Manifest>(manifestStream, ManifestJsonOptions) ?? throw new Exception("manifest.json parse failed");
-        _translator = Manifest.DefaultLocale == null ? Translator.Default : new Translator(Manifest.DefaultLocale, _content);
+        var id = CrxId(hdr);
+        return new Crx(id, new ZipArchive(stream, ZipArchiveMode.Read));
     }
 
-    public Dictionary<string, Icon> Icon()
+    public static Crx FromZipArchive(ZipArchive zipArchive)
     {
-        return Manifest.Icons.Select(m => new Icon(_content.GetEntry(m.Value))).ToDictionary(m => m.Name, m => m);
+        return new Crx("", zipArchive);
+    }
+
+    private static Manifest ExtractManifest(ZipArchive zipArchive)
+    {
+        var manifestEntry = zipArchive.GetEntry("manifest.json") ?? throw new Exception("manifest.json not found");
+        using var manifestStream = manifestEntry.Open();
+        return JsonSerializer.Deserialize<Manifest>(manifestStream, ManifestJsonOptions) ?? throw new Exception("manifest.json parse failed");
+    }
+
+    public Dictionary<string, Icon> Icons()
+    {
+        return Manifest.Icons.Select(m => _iconExtractor.Extract(m.Value)).ToDictionary(m => m.Name, m => m);
     }
 
     public string GetMessage(string msg, string lang = "")
@@ -75,28 +91,9 @@ public class Crx : IDisposable
         return sb.ToString();
     }
 
-    public byte[] ToByteArray()
-    {
-        return memoryStream.ToArray();
-    }
-
     public void Dispose()
     {
-        _content.Dispose();
-    }
-}
-
-public class Icon
-{
-    public string Name { get; set; }
-    public byte[] Data { get; set; }
-
-    internal Icon(ZipArchiveEntry entry)
-    {
-        Name = entry.Name;
-        Data = new byte[entry.Length];
-        using var stream = entry.Open();
-        stream.Read(Data, 0, (int)entry.Length);
+        _zipArchive.Dispose();
     }
 }
 

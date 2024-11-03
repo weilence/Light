@@ -14,7 +14,7 @@ public class CrxTest
         var downloadUrl = string.Format(downloadUrlTemplate, version, pluginId);
         var client = new HttpClient();
         var stream = await client.GetStreamAsync(downloadUrl);
-        var crx = new Crx(stream);
+        var crx = Crx.FromStream(stream);
 
         Assert.Equal(crx.Id, pluginId);
     }
