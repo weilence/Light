@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -157,6 +158,27 @@ public static class ExtensionMethods
         else
         {
             data = query.Skip((page - 1) * size).Take(size).ToList();
+        }
+
+        return (total, data);
+    }
+
+    public static async Task<(long, List<T>)> ToPageAsync<T>(this IQueryable<T> query, int page, int size)
+    {
+        if (query is not IOrderedQueryable<T>)
+        {
+            throw new Exception("ToPage must be used after OrderBy");
+        }
+
+        var total = await query.LongCountAsync();
+        List<T> data;
+        if (page == 0 && size == 0)
+        {
+            data = await query.ToListAsync();
+        }
+        else
+        {
+            data = await query.Skip((page - 1) * size).Take(size).ToListAsync();
         }
 
         return (total, data);
