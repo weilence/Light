@@ -84,50 +84,63 @@ public static class ExtensionMethods
         switch (e.Entry.State)
         {
             case EntityState.Added:
-                if (e.Entry.Entity is ICreateAt createAtEntity)
                 {
-                    createAtEntity.CreateAt = DateTime.UtcNow;
-                }
+                    if (e.Entry.Entity is ICreateAt createAtEntity)
+                    {
+                        createAtEntity.CreateAt = DateTime.UtcNow;
+                    }
 
-                if (e.Entry.Entity is ICreateBy<T> createByEntity)
-                {
-                    createByEntity.CreateBy = auditProvider.Audit;
-                }
+                    if (e.Entry.Entity is ICreateBy<T> createByEntity)
+                    {
+                        createByEntity.CreateBy = auditProvider.Audit;
+                    }
 
-                if (e.Entry.Entity is ITenant<T> tenantEntity)
-                {
-                    tenantEntity.Tenant = tenantProvider.Tenant;
-                }
+                    if (e.Entry.Entity is IUpdateAt updateAtEntity)
+                    {
+                        updateAtEntity.UpdateAt = DateTime.UtcNow;
+                    }
 
+                    if (e.Entry.Entity is IUpdateBy<T> updateByEntity)
+                    {
+                        updateByEntity.UpdateBy = auditProvider.Audit;
+                    }
+
+                    if (e.Entry.Entity is ITenant<T> tenantEntity)
+                    {
+                        tenantEntity.Tenant = tenantProvider.Tenant;
+                    }
+                }
                 break;
             case EntityState.Modified:
-                if (e.Entry.Entity is IUpdateAt updateAtEntity)
                 {
-                    updateAtEntity.UpdateAt = DateTime.UtcNow;
-                }
+                    if (e.Entry.Entity is IUpdateAt updateAtEntity)
+                    {
+                        updateAtEntity.UpdateAt = DateTime.UtcNow;
+                    }
 
-                if (e.Entry.Entity is IUpdateBy<T> updateByEntity)
-                {
-                    updateByEntity.UpdateBy = auditProvider.Audit;
+                    if (e.Entry.Entity is IUpdateBy<T> updateByEntity)
+                    {
+                        updateByEntity.UpdateBy = auditProvider.Audit;
+                    }
                 }
-
                 break;
             case EntityState.Deleted:
-                if (e.Entry.Entity is ISoftDelete softDeleteEntity)
                 {
-                    e.Entry.State = EntityState.Modified;
-                    softDeleteEntity.IsDelete = true;
-                    if (e.Entry.Entity is IUpdateAt updateAtEntityDelete)
+                    if (e.Entry.Entity is ISoftDelete softDeleteEntity)
                     {
-                        updateAtEntityDelete.UpdateAt = DateTime.UtcNow;
-                    }
+                        e.Entry.State = EntityState.Modified;
+                        softDeleteEntity.IsDelete = true;
+                        if (e.Entry.Entity is IUpdateAt updateAtEntityDelete)
+                        {
+                            updateAtEntityDelete.UpdateAt = DateTime.UtcNow;
+                        }
 
-                    if (e.Entry.Entity is IUpdateBy<T> updateByEntityDelete)
-                    {
-                        updateByEntityDelete.UpdateBy = auditProvider.Audit;
+                        if (e.Entry.Entity is IUpdateBy<T> updateByEntityDelete)
+                        {
+                            updateByEntityDelete.UpdateBy = auditProvider.Audit;
+                        }
                     }
                 }
-
                 break;
         }
     }
